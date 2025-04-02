@@ -13,6 +13,15 @@ namespace UmeåUppgiftAPI
             
             // Register HttpClient
             builder.Services.AddHttpClient<CatApiService>();
+            
+            // Add session services
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30); // Session timeout
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true; // Make the session cookie essential
+            });
 
             var app = builder.Build();
 
@@ -30,6 +39,9 @@ namespace UmeåUppgiftAPI
             app.UseRouting();
 
             app.UseAuthorization();
+            
+            // Use session middleware
+            app.UseSession();
 
             app.MapControllerRoute(
                 name: "default",
