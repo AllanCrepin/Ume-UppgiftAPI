@@ -1,3 +1,5 @@
+using UmeåUppgiftAPI.Services;
+
 namespace UmeåUppgiftAPI
 {
     public class Program
@@ -8,6 +10,9 @@ namespace UmeåUppgiftAPI
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            
+            // Register HttpClient
+            builder.Services.AddHttpClient<CatApiService>();
 
             var app = builder.Build();
 

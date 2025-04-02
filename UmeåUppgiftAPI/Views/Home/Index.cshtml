@@ -1,8 +1,38 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model CatImagesViewModel
+@{
+    ViewData["Title"] = "Cat Gallery";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container">
+    <div class="text-center mb-4">
+        <h1 class="display-4">Cat Gallery</h1>
+        <p>A beautiful collection of cat images from The Cat API</p>
+    </div>
+
+    <div id="cat-container" class="row">
+        @foreach (var image in Model.Images)
+        {
+            <div class="col-md-3 mb-4">
+                <div class="card h-100 cat-card">
+                    <img src="@image.Url" class="card-img-top" alt="Cat Image" loading="lazy">
+                    <div class="card-body">
+                        <h5 class="card-title">Cat ID: @image.Id</h5>
+                        <p class="card-text">Size: @image.Width x @image.Height</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="text-center my-4">
+        <div id="loading-spinner" class="spinner-border text-primary d-none" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <input type="hidden" id="current-page" value="@Model.CurrentPage" />
 </div>
+
+@section Scripts {
+    <script src="~/js/cat-gallery.js" asp-append-version="true"></script>
+}
