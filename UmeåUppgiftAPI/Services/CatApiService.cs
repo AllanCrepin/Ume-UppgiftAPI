@@ -17,20 +17,39 @@ namespace UmeåUppgiftAPI.Services
         public async Task<List<CatImage>> GetCatImagesAsync(int limit = 20, int page = 0)
         {
             var response = await _httpClient.GetAsync($"{_baseUrl}/images/search?limit={limit}&page={page}");
-            
+
             if (response.IsSuccessStatusCode)
             {
                 var options = new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 };
-                
+
                 var content = await response.Content.ReadAsStringAsync();
                 var images = JsonSerializer.Deserialize<List<CatImage>>(content, options);
                 return images ?? new List<CatImage>();
             }
-            
+
             return new List<CatImage>();
+        }
+
+        public async Task<CatImage> GetCatImageAsync(string id)
+        {
+            var response = await _httpClient.GetAsync($"{_baseUrl}/images/{id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
+
+                var content = await response.Content.ReadAsStringAsync();
+                var image = JsonSerializer.Deserialize<CatImage>(content, options);
+                return image ?? new CatImage();
+            }
+
+            return new CatImage();
         }
     }
 } 
