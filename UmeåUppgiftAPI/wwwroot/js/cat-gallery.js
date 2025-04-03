@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             <div class="card h-100 cat-card">
                                 <img src="${cat.url}" class="card-img-top" alt="Cat Image" loading="lazy">
                                 <div class="card-body">
-                                    <h5 class="card-title">Cat ID: ${cat.id}</h5>
+                                    <h5 class="card-title">@cats[randomNum]</h5
                                     <p class="card-text">Size: ${cat.width} x ${cat.height}</p>
                                     <button class="btn btn-sm btn-outline-primary favorite-btn" data-cat-id="${cat.id}">
                                         ♡ Add to Favorites
