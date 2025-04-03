@@ -4,6 +4,17 @@ document.addEventListener('DOMContentLoaded', function () {
     let currentPage = parseInt(document.getElementById('current-page').value) || 0;
     const catContainer = document.getElementById('cat-container');
     const loadingSpinner = document.getElementById('loading-spinner');
+    const modal = document.getElementById("image-modal");
+    const modalImg = document.getElementById("modal-image");
+
+    // Function to add modal functionality to an image
+    function attachModalToImage(imgElement) {
+        imgElement.style.cursor = "pointer";
+        imgElement.addEventListener("click", function() {
+            modal.style.display = "flex";
+            modalImg.src = this.dataset.catUrl;
+        });
+    }
 
     // Function to load more cats
     function loadMoreCats() {
@@ -27,9 +38,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         
                         col.innerHTML = `
                             <div class="card h-100 cat-card">
-                                <img src="${cat.url}" class="card-img-top" alt="Cat Image" loading="lazy">
+                                <img src="${cat.url}" class="card-img-top cat-image" alt="Cat Image" data-cat-url="${cat.url}" style="cursor: pointer;" loading="lazy">
                                 <div class="card-body">
-                                    <h5 class="card-title">@cats[randomNum]</h5
+                                    <h5 class="card-title">${cat.name}</h5>
                                     <p class="card-text">Size: ${cat.width} x ${cat.height}</p>
                                     <button class="btn btn-sm btn-outline-primary favorite-btn" data-cat-id="${cat.id}">
                                         ♡ Add to Favorites
@@ -46,6 +57,12 @@ document.addEventListener('DOMContentLoaded', function () {
                             favoriteBtn.addEventListener('click', function(e) {
                                 addToFavorites(e.target.getAttribute('data-cat-id'), e.target);
                             });
+                        }
+                        
+                        // Add modal functionality to the newly added image
+                        const catImage = col.querySelector('.cat-image');
+                        if (catImage) {
+                            attachModalToImage(catImage);
                         }
                     });
                     

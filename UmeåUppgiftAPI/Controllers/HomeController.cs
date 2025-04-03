@@ -74,7 +74,21 @@ namespace UmeåUppgiftAPI.Controllers
                 }
                 
                 var images = await _catApiService.GetCatImagesAsync(20, page);
-                return Json(images);
+                
+                // Generate random cat names for each image
+                string[] cats = { "Funny cat", "Cute cat", "Strange cat", "Weird Cat", "Scary cat" };
+                var random = new Random();
+                
+                var imagesWithNames = images.Select(img => new 
+                {
+                    id = img.Id,
+                    url = img.Url,
+                    width = img.Width,
+                    height = img.Height,
+                    name = cats[random.Next(cats.Length)]
+                }).ToList();
+                
+                return Json(imagesWithNames);
             }
             catch (Exception ex)
             {
