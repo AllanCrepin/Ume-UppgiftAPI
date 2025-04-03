@@ -7,17 +7,38 @@
     <div class="text-center mb-4">
         <h1 class="display-4">Cat Gallery</h1>
         <p>A beautiful collection of cat images from The Cat API</p>
+        @if (Model.UserSessionData != null)
+        {
+            <p class="small text-muted">
+                Session active for @((DateTime.UtcNow - Model.UserSessionData.CreatedAt).TotalMinutes.ToString("F1")) minutes
+                | Page visits: @Model.UserSessionData.PageVisits
+            </p>
+        }
     </div>
 
     <div id="cat-container" class="row">
         @foreach (var image in Model.Images)
         {
+            bool isFavorite = Model.UserSessionData?.FavoriteCatIds.Contains(image.Id) ?? false;
+            
             <div class="col-md-3 mb-4">
                 <div class="card h-100 cat-card">
                     <img src="@image.Url" class="card-img-top" alt="Cat Image" loading="lazy">
                     <div class="card-body">
                         <h5 class="card-title">Cat ID: @image.Id</h5>
                         <p class="card-text">Size: @image.Width x @image.Height</p>
+                        @if (isFavorite)
+                        {
+                            <button class="btn btn-sm btn-primary favorite-btn" disabled>
+                                ❤ Favorited
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-sm btn-outline-primary favorite-btn" data-cat-id="@image.Id">
+                                ♡ Add to Favorites
+                            </button>
+                        }
                     </div>
                 </div>
             </div>
@@ -31,6 +52,9 @@
     </div>
 
     <input type="hidden" id="current-page" value="@Model.CurrentPage" />
+    
+    @* This is needed for CSRF protection when adding favorites *@
+    @Html.AntiForgeryToken()
 </div>
 
 @section Scripts {

@@ -19,5 +19,6 @@ namespace UmeåUppgiftAPI.Models
         public List<CatImage> Images { get; set; } = new List<CatImage>();
         public int CurrentPage { get; set; } = 0;
         public int TotalPages { get; set; } = 0;
+        public UserSession? UserSessionData { get; set; }
     }
 } 

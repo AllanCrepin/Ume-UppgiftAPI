@@ -1,0 +1,93 @@
+@model UserSession
+@{
+    ViewData["Title"] = "Session Information";
+}
+
+<div class="container">
+    <h1 class="my-4">Session Information</h1>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>Session Details</h2>
+        </div>
+        <div class="card-body">
+            <div class="row mb-2">
+                <div class="col-md-3 fw-bold">Session ID:</div>
+                <div class="col-md-9">@Model.SessionId</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-3 fw-bold">Created:</div>
+                <div class="col-md-9">@Model.CreatedAt.ToString("g")</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-3 fw-bold">Last Activity:</div>
+                <div class="col-md-9">@Model.LastActivity.ToString("g")</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-3 fw-bold">Page Visits:</div>
+                <div class="col-md-9">@Model.PageVisits</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-md-3 fw-bold">Preferred Cat Breed:</div>
+                <div class="col-md-9">@(Model.PreferredCatBreed ?? "Not set")</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>Favorite Cats</h2>
+        </div>
+        <div class="card-body">
+            @if (Model.FavoriteCatIds.Any())
+            {
+                <ul class="list-group">
+                    @foreach (var catId in Model.FavoriteCatIds)
+                    {
+                        <li class="list-group-item">@catId</li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p>No favorite cats selected yet.</p>
+            }
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>Custom Session Data</h2>
+        </div>
+        <div class="card-body">
+            @if (Model.CustomData.Any())
+            {
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Key</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.CustomData)
+                        {
+                            <tr>
+                                <td>@item.Key</td>
+                                <td>@item.Value</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p>No custom data stored in session.</p>
+            }
+        </div>
+    </div>
+    
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-4">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Back to Cat Gallery</a>
+    </div>
+</div> 

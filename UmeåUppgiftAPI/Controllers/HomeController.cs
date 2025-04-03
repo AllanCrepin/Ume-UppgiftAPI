@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using UmeåUppgiftAPI.Models;
 using UmeåUppgiftAPI.Services;
+using UmeåUppgiftAPI.Helpers;
 
 namespace UmeåUppgiftAPI.Controllers
 {
@@ -9,6 +10,7 @@ namespace UmeåUppgiftAPI.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly CatApiService _catApiService;
+        private const string SessionKey = "UserSession";
 
         public HomeController(ILogger<HomeController> logger, CatApiService catApiService)
         {
@@ -18,6 +20,16 @@ namespace UmeåUppgiftAPI.Controllers
 
         public async Task<IActionResult> Index(int page = 0)
         {
+            // Get or initialize user session
+            var userSession = HttpContext.Session.GetObject<UserSession>(SessionKey) ?? new UserSession();
+            
+            // Update user activity
+            userSession.LastActivity = DateTime.UtcNow;
+            userSession.PageVisits++;
+            
+            // Save session data
+            HttpContext.Session.SetObject(SessionKey, userSession);
+            
             try
             {
                 var images = await _catApiService.GetCatImagesAsync(20, page);
@@ -26,7 +38,8 @@ namespace UmeåUppgiftAPI.Controllers
                 {
                     Images = images,
                     CurrentPage = page,
-                    TotalPages = 100 // Arbitrary large number since the API doesn't provide a total count
+                    TotalPages = 100, // Arbitrary large number since the API doesn't provide a total count
+                    UserSessionData = userSession // Pass session data to view
                 };
                 
                 return View(viewModel);
@@ -34,7 +47,7 @@ namespace UmeåUppgiftAPI.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error fetching cat images");
-                return View(new CatImagesViewModel());
+                return View(new CatImagesViewModel { UserSessionData = userSession });
             }
         }
 
@@ -43,6 +56,23 @@ namespace UmeåUppgiftAPI.Controllers
         {
             try
             {
+                // Track page loading in session
+                var userSession = HttpContext.Session.GetObject<UserSession>(SessionKey);
+                if (userSession != null)
+                {
+                    userSession.LastActivity = DateTime.UtcNow;
+                    if (!userSession.CustomData.ContainsKey("PagesLoaded"))
+                    {
+                        userSession.CustomData["PagesLoaded"] = new List<int>();
+                    }
+                    
+                    var pagesLoaded = (List<int>)userSession.CustomData["PagesLoaded"];
+                    pagesLoaded.Add(page);
+                    userSession.CustomData["PagesLoaded"] = pagesLoaded;
+                    
+                    HttpContext.Session.SetObject(SessionKey, userSession);
+                }
+                
                 var images = await _catApiService.GetCatImagesAsync(20, page);
                 return Json(images);
             }
@@ -52,9 +82,44 @@ namespace UmeåUppgiftAPI.Controllers
                 return Json(new List<CatImage>());
             }
         }
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddFavoriteCat(string catId)
+        {
+            var userSession = HttpContext.Session.GetObject<UserSession>(SessionKey);
+            if (userSession != null && !string.IsNullOrEmpty(catId))
+            {
+                if (!userSession.FavoriteCatIds.Contains(catId))
+                {
+                    userSession.FavoriteCatIds.Add(catId);
+                    HttpContext.Session.SetObject(SessionKey, userSession);
+                    return Json(new { success = true, message = "Added to favorites" });
+                }
+            }
+            
+            return Json(new { success = false, message = "Could not add to favorites" });
+        }
+        
+        [HttpGet]
+        public IActionResult SessionInfo()
+        {
+            var userSession = HttpContext.Session.GetObject<UserSession>(SessionKey);
+            return View(userSession ?? new UserSession());
+        }
 
         public IActionResult Privacy()
         {
+            // Update session data on privacy page visit
+            var userSession = HttpContext.Session.GetObject<UserSession>(SessionKey);
+            if (userSession != null)
+            {
+                userSession.LastActivity = DateTime.UtcNow;
+                userSession.PageVisits++;
+                userSession.CustomData["VisitedPrivacyPage"] = true;
+                HttpContext.Session.SetObject(SessionKey, userSession);
+            }
+            
             return View();
         }
 
