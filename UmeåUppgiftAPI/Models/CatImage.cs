@@ -21,4 +21,6 @@ namespace UmeåUppgiftAPI.Models
         public int TotalPages { get; set; } = 0;
         public UserSession? UserSessionData { get; set; }
     }
+
+
 } 
