@@ -4,36 +4,9 @@
 }
 
 <div class="container">
-    <h1 class="my-4">Session Information</h1>
-    
-    <div class="card mb-4">
-        <div class="card-header">
-            <h2>Session Details</h2>
-        </div>
-        <div class="card-body">
-            <div class="row mb-2">
-                <div class="col-md-3 fw-bold">Session ID:</div>
-                <div class="col-md-9">@Model.SessionId</div>
-            </div>
-            <div class="row mb-2">
-                <div class="col-md-3 fw-bold">Created:</div>
-                <div class="col-md-9">@Model.CreatedAt.ToString("g")</div>
-            </div>
-            <div class="row mb-2">
-                <div class="col-md-3 fw-bold">Last Activity:</div>
-                <div class="col-md-9">@Model.LastActivity.ToString("g")</div>
-            </div>
-            <div class="row mb-2">
-                <div class="col-md-3 fw-bold">Page Visits:</div>
-                <div class="col-md-9">@Model.PageVisits</div>
-            </div>
-            <div class="row mb-2">
-                <div class="col-md-3 fw-bold">Preferred Cat Breed:</div>
-                <div class="col-md-9">@(Model.PreferredCatBreed ?? "Not set")</div>
-            </div>
-        </div>
-    </div>
-    
+    <h1 class="my-4">Favorites</h1>
+
+
     <div class="card mb-4">
         <div class="card-header">
             <h2>Favorite Cats</h2>
@@ -41,10 +14,12 @@
         <div class="card-body">
             @if (Model.FavoriteCatIds.Any())
             {
-                <ul class="list-group">
+                <ul id="cat-list" class="list-group d-flex flex-wrap gap-3">
                     @foreach (var catId in Model.FavoriteCatIds)
                     {
-                        <li class="list-group-item">@catId</li>
+                        <li class="list-group-item cat-item p-2 border-0" data-cat-id="@catId">
+                            <img src="" alt="Loading..." class="cat-image rounded shadow-sm" style="width: 150px; height: auto; cursor: pointer; display: none;">
+                        </li>
                     }
                 </ul>
             }
@@ -54,40 +29,100 @@
             }
         </div>
     </div>
-    
-    <div class="card mb-4">
-        <div class="card-header">
-            <h2>Custom Session Data</h2>
-        </div>
-        <div class="card-body">
-            @if (Model.CustomData.Any())
-            {
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Key</th>
-                            <th>Value</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model.CustomData)
-                        {
-                            <tr>
-                                <td>@item.Key</td>
-                                <td>@item.Value</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            }
-            else
-            {
-                <p>No custom data stored in session.</p>
-            }
-        </div>
-    </div>
-    
+
+
     <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-4">
         <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Back to Cat Gallery</a>
     </div>
-</div> 
+</div>
+
+<!-- Fullscreen Modal -->
+<div id="image-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <img id="modal-image" src="" alt="Full-size cat image">
+    </div>
+</div>
+
+<style>
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(10px);
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        position: relative;
+        max-width: 80%;
+        max-height: 80%;
+    }
+
+        .modal-content img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.2);
+        }
+
+    /* Close Button */
+    .close {
+        position: absolute;
+        top: 10px;
+        right: 20px;
+        font-size: 30px;
+        color: white;
+        cursor: pointer;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const baseUrl = "https://api.thecatapi.com/v1/images/";
+        const modal = document.getElementById("image-modal");
+        const modalImg = document.getElementById("modal-image");
+        const closeModal = document.querySelector(".close");
+
+        // Fetch and display images
+        document.querySelectorAll(".cat-item").forEach(item => {
+            const catId = item.dataset.catId;
+            const imgElement = item.querySelector(".cat-image");
+
+            if (catId) {
+                fetch(`${baseUrl}${catId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        imgElement.src = data.url;
+                        imgElement.style.display = "block";
+
+                        // Add click event to open modal
+                        imgElement.addEventListener("click", function () {
+                            modal.style.display = "flex";
+                            modalImg.src = data.url;
+                        });
+                    })
+                    .catch(error => console.error("Error fetching cat image:", error));
+            }
+        });
+
+        // Close modal on click
+        closeModal.addEventListener("click", function () {
+            modal.style.display = "none";
+        });
+
+        // Close modal when clicking outside the image
+        modal.addEventListener("click", function (event) {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        });
+    });
+</script>
