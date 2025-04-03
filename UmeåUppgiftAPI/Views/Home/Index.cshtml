@@ -6,7 +6,7 @@
 
 @{
 
-    string[] cats = { "Funny cat", "Cute cat", "Strange cat", "Weird Cat", "Scary cat" };
+    string[] cats = { "Funny cat", "Cute cat", "Strange cat", "Weird Cat", "Scary cat", "Dangerous cat", "Awesome cat" };
     var random = new Random();
     
 }
@@ -33,7 +33,7 @@
                 <div class="card h-100 cat-card">
                     <img src="@image.Url" class="card-img-top cat-image" alt="Cat Image" data-cat-url="@image.Url" style="cursor: pointer;" loading="lazy">
                     <div class="card-body">
-                        @{var randomNum = random.Next(4);}
+                        @{var randomNum = random.Next(cats.Length);}
                         <h5 class="card-title">@cats[randomNum]</h5
                         <p class="card-text">Size: @image.Width x @image.Height</p>
                         @if (isFavorite)
